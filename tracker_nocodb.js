@@ -210,7 +210,6 @@ async function scrapeMentions() {
     
     // Wait for content to load
     await delay(2000);
-
      
     // Take screenshot after waiting
     await takeScreenshot(page, 'after_wait');
@@ -229,16 +228,12 @@ async function scrapeMentions() {
       // Every 5 scrolls, pause longer
       if ((i + 1) % 5 === 0) {
         await delay(2000);
+        await takeScreenshot(page, `scroll_${i+1}`);
       }
     }
 
-       // Add this line
-    await takeScreenshot(page, `scroll_${i+1}`);
-  }
-}
-
-// Add this line after the loop
-await takeScreenshot(page, 'final_state');
+    // Take screenshot of final state after scrolling
+    await takeScreenshot(page, 'final_state');
     
     // Extract tweets with enhanced timestamp detection
     const tweets = await page.evaluate((targetAccount, currentTimeStr) => {
