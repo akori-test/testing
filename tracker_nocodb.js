@@ -51,6 +51,14 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Take screenshot
+async function takeScreenshot(page, name) {
+  const screenshotPath = path.join(OUTPUT_DIRECTORY, `screenshot_${name}_${Date.now()}.png`);
+  console.log(`Taking screenshot: ${screenshotPath}`);
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+  return screenshotPath;
+}
+
 // Global browser instance
 let browser = null;
 
@@ -196,9 +204,16 @@ async function scrapeMentions() {
     
     await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 60000 });
     console.log('Search page loaded');
+
+    // Take screenshot after initial page load
+    await takeScreenshot(page, 'initial_load');
     
     // Wait for content to load
     await delay(2000);
+
+     
+    // Take screenshot after waiting
+    await takeScreenshot(page, 'after_wait');
     
     // Scroll down to load more tweets
     console.log(`Scrolling ${SCROLL_COUNT} times to load more tweets...`);
