@@ -34,10 +34,11 @@ jobs:
         run: node tracker_nocodb.js
         env:
           NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
-
-    - name: Upload Screenshots
-  uses: actions/upload-artifact@v3
-  if: always()  # This ensures it runs even if the script fails
-  with:
-    name: screenshots
-    path: results/*.png
+          
+      # Add this step to upload screenshots
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: screenshots
+          path: results/*.png
