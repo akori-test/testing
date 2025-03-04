@@ -18,7 +18,7 @@ const USER_DATA_DIR = path.join(__dirname, 'chrome_profile');
 
 // NocoDB configuration
 const NOCODB_API_URL = 'https://app.nocodb.com/api/v2';
-const NOCODB_API_KEY = 'MK93fRsPqr1RTOqHtmsHCtpdkkFmQZggnEEQCDzR';
+const NOCODB_API_KEY = process.env.NOCODB_API_KEY || 'MK93fRsPqr1RTOqHtmsHCtpdkkFmQZggnEEQCDzR';
 const NOCODB_TABLE_NAME = 'm65h3mj24dabtzt'; // Use the table ID, not the display name
 const NOCODB_RECORD_ID = ''; // Leave blank to create new records each time
 
