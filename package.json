@@ -1,9 +1,13 @@
 {
-  "name": "mention-tracker",
+  "name": "twitter-mentions-tracker",
   "version": "1.0.0",
-  "description": "Tracks mentions and updates NocoDB",
+  "description": "Tracks Twitter mentions and updates NocoDB",
   "main": "tracker_nocodb.js",
   "dependencies": {
+    "puppeteer": "^19.7.0",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7",
+    "moment": "^2.29.4",
     "axios": "^1.3.4"
   },
   "scripts": {
