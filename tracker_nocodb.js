@@ -66,7 +66,7 @@ let browser = null;
 async function initBrowser() {
   if (!browser) {
     browser = await puppeteer.launch({
-      headless: new, // Run headless for automated server deployment
+      headless: 'new', // Run headless for automated server deployment
       userDataDir: USER_DATA_DIR,
       args: [
         '--no-sandbox',
