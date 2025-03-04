@@ -1,0 +1,16 @@
+name: Twitter Mention Tracker
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # Every 15 minutes
+
+jobs:
+  track-mentions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - run: npm install
+      - run: node tracker_nocodb.js
