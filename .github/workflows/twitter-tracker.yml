@@ -3,15 +3,34 @@ name: Twitter Mention Tracker
 on:
   schedule:
     - cron: '*/15 * * * *' # Every 15 minutes
-  workflow_dispatch: # Add this line to enable manual triggering
+  workflow_dispatch: # Add this for manual triggering
 
 jobs:
   track-mentions:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
       - uses: actions/setup-node@v3
         with:
           node-version: '16'
-      - run: npm install
-      - run: node tracker_nocodb.js
+      
+      # Install Chrome for Puppeteer
+      - name: Install Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install ./google-chrome-stable_current_amd64.deb
+      
+      # Create directories needed by the script
+      - name: Create directories
+        run: |
+          mkdir -p results
+          mkdir -p chrome_profile
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run tracker script
+        run: node tracker_nocodb.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
