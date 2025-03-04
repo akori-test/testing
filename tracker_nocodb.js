@@ -171,6 +171,59 @@ async function updateNocoDB(totalMentions) {
   }
 }
 
+// Add this function after updateNocoDB but before scrapeMentions
+async function loginToTwitter(page) {
+  console.log('Logging in to Twitter...');
+  
+  try {
+    // Navigate to login page
+    await page.goto('https://twitter.com/i/flow/login', { waitUntil: 'networkidle2' });
+    await takeScreenshot(page, 'login_page');
+    
+    // Wait for username field and type username
+    await page.waitForSelector('input[autocomplete="username"]');
+    await page.type('input[autocomplete="username"]', process.env.TWITTER_USERNAME);
+    
+    // Click the Next button
+    const nextButton = await page.$('div[role="button"]:has-text("Next")');
+    if (nextButton) {
+      await nextButton.click();
+    } else {
+      // Try alternate button selector if the first one doesn't work
+      await page.click('div[data-testid="auth_input_floating_action"]');
+    }
+    
+    // Wait for password field
+    await page.waitForSelector('input[type="password"]', { timeout: 5000 });
+    await takeScreenshot(page, 'password_page');
+    
+    // Type password
+    await page.type('input[type="password"]', process.env.TWITTER_PASSWORD);
+    
+    // Click login button
+    const loginButton = await page.$('div[data-testid="LoginForm_Login_Button"]');
+    if (loginButton) {
+      await loginButton.click();
+    } else {
+      // Try alternate button selector
+      await page.click('div[role="button"]:has-text("Log in")');
+    }
+    
+    // Wait for login to complete
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    await takeScreenshot(page, 'after_login');
+    
+    console.log('Login successful');
+    return true;
+  } catch (error) {
+    console.error('Error during login:', error.message);
+    await takeScreenshot(page, 'login_error');
+    return false;
+  }
+}
+
+
+
 async function scrapeMentions() {
   const runStart = new Date();
   console.log(`\n[${runStart.toLocaleString()}] Checking mentions of @${TARGET_ACCOUNT}...`);
@@ -197,6 +250,12 @@ async function scrapeMentions() {
     // Set viewport and user agent
     await page.setViewport({ width: 1280, height: 800 });
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
+
+    // Log in to Twitter first
+    const loginSuccess = await loginToTwitter(page);
+    if (!loginSuccess) {
+      console.log('Failed to log in to Twitter. Continuing anyway...');
+    }
     
     // Navigate to the search results
     const searchUrl = `https://x.com/search?q=%40${TARGET_ACCOUNT}&src=typed_query&f=live`;
