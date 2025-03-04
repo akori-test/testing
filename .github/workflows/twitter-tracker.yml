@@ -42,3 +42,11 @@ jobs:
         with:
           name: screenshots
           path: results/*.png
+
+
+      - name: Run tracker script
+        run: node tracker_nocodb.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
