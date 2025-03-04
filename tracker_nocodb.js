@@ -66,7 +66,7 @@ let browser = null;
 async function initBrowser() {
   if (!browser) {
     browser = await puppeteer.launch({
-      headless: true, // Run headless for automated server deployment
+      headless: new, // Run headless for automated server deployment
       userDataDir: USER_DATA_DIR,
       args: [
         '--no-sandbox',
@@ -231,6 +231,14 @@ async function scrapeMentions() {
         await delay(2000);
       }
     }
+
+       // Add this line
+    await takeScreenshot(page, `scroll_${i+1}`);
+  }
+}
+
+// Add this line after the loop
+await takeScreenshot(page, 'final_state');
     
     // Extract tweets with enhanced timestamp detection
     const tweets = await page.evaluate((targetAccount, currentTimeStr) => {
