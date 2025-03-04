@@ -423,6 +423,7 @@ function cleanup() {
 }
 
 // Main execution function
+// Main execution function
 async function main() {
   console.log(`[${new Date().toLocaleString()}] Started automated tracker for @${TARGET_ACCOUNT}`);
   console.log(`Tracking the last ${TRACKING_HOURS} hours of mentions`);
@@ -431,7 +432,14 @@ async function main() {
   // Run initial scrape
   await scrapeMentions();
   
-  // Set up interval for regular checks (convert minutes to milliseconds)
+  // Check if running in GitHub Actions
+  if (process.env.GITHUB_ACTIONS) {
+    console.log("Running in GitHub Actions - exiting after one run");
+    cleanup();
+    return; // Exit the function
+  }
+  
+  // If not in GitHub Actions, set up interval for regular checks
   const intervalId = setInterval(scrapeMentions, REFRESH_INTERVAL_MINUTES * 60 * 1000);
   
   // Handle graceful shutdown
