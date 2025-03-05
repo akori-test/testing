@@ -91,6 +91,13 @@ async function loadTwitterCookies(page) {
   try {
     console.log('Loading pre-authenticated Twitter session...');
     
+    // Debug the environment variable
+    console.log('TWITTER_COOKIES exists:', !!process.env.TWITTER_COOKIES);
+    if (process.env.TWITTER_COOKIES) {
+      console.log('TWITTER_COOKIES length:', process.env.TWITTER_COOKIES.length);
+      console.log('TWITTER_COOKIES first 10 chars:', process.env.TWITTER_COOKIES.substring(0, 10) + '...');
+    }
+    
     // Get cookies from environment variable and parse them
     const cookiesString = process.env.TWITTER_COOKIES;
     if (!cookiesString) {
@@ -98,8 +105,15 @@ async function loadTwitterCookies(page) {
       return false;
     }
     
-    const cookies = JSON.parse(cookiesString);
-    console.log(`Found ${cookies.length} Twitter cookies`);
+    // Try parsing with additional error handling
+    let cookies;
+    try {
+      cookies = JSON.parse(cookiesString);
+      console.log(`Successfully parsed cookies, found ${cookies.length} cookies`);
+    } catch (parseError) {
+      console.error('Error parsing cookies JSON:', parseError.message);
+      return false;
+    }
     
     // Set these cookies in the browser
     await page.setCookie(...cookies);
