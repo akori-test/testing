@@ -175,6 +175,7 @@ function assignHourBucket(tweetTimestamp, currentTime, relativeTime) {
 }
 
 // Function to update NocoDB with just the total mentions and timestamp
+// Function to update NocoDB with complete record data
 async function updateNocoDB(totalMentions) {
   try {
     const headers = {
@@ -182,10 +183,35 @@ async function updateNocoDB(totalMentions) {
       'Content-Type': 'application/json'
     };
     
-    // Simplified data - just timestamp and total mentions
+    // Get the latest measurement_id to increment
+    let nextMeasurementId = 1;
+    
+    try {
+      // Attempt to fetch the latest record to get the current highest measurement_id
+      const latestResponse = await axios.get(
+        `${NOCODB_API_URL}/tables/${NOCODB_TABLE_NAME}/records?sort=-measurement_id&limit=1`,
+        { headers }
+      );
+      
+      if (latestResponse.data && latestResponse.data.list && latestResponse.data.list.length > 0) {
+        const currentHighestId = latestResponse.data.list[0].measurement_id;
+        nextMeasurementId = currentHighestId + 1;
+        console.log(`Latest measurement_id found: ${currentHighestId}, using ${nextMeasurementId} for new record`);
+      } else {
+        console.log('No existing records found, starting with measurement_id = 1');
+      }
+    } catch (error) {
+      console.error('Error fetching latest measurement_id:', error.message);
+      console.log('Defaulting to measurement_id = 1');
+    }
+    
+    // Complete data for all columns
     const data = {
-      timestamp: new Date().toISOString(),
-      total_mentions: totalMentions
+      measurement_id: nextMeasurementId,
+      token_name: 'BankrCoin',
+      token_id: '0x22af33fe49fd1fa80c7149773dde5890d3c76f3b',
+      total_mentions: totalMentions,
+      timestamp: new Date().toISOString()
     };
     
     let response;
@@ -205,7 +231,7 @@ async function updateNocoDB(totalMentions) {
         data,
         { headers }
       );
-      console.log(`Created new NocoDB record`);
+      console.log(`Created new NocoDB record with measurement_id: ${nextMeasurementId}`);
     }
     
     return response.data;
