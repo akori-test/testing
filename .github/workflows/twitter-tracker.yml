@@ -45,6 +45,12 @@ jobs:
           TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
           TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
 
+      # Clean up browser processes before running next tracker
+      - name: Clean up between trackers
+        run: |
+          pkill -f chrome || true
+          sleep 5
+
 
       - name: Run tracker script for aixbt
         run: node aixbt.js
