@@ -30,10 +30,14 @@ jobs:
       - name: Install dependencies
         run: npm install
       
+      # Single run tracker script step with all environment variables
       - name: Run tracker script
         run: node tracker_nocodb.js
         env:
           NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
           
       # Add this step to upload screenshots
       - name: Upload Screenshots
@@ -42,19 +46,3 @@ jobs:
         with:
           name: screenshots
           path: results/*.png
-
-
-      - name: Run tracker script
-        run: node tracker_nocodb.js
-        env:
-          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
-          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
-          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
-
-      - name: Run tracker script
-        run: node tracker_nocodb.js
-        env:
-          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
-          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
-          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
-          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
