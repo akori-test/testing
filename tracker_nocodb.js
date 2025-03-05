@@ -86,6 +86,32 @@ async function initBrowser() {
   return browser;
 }
 
+// Add the new cookie loading function here
+async function loadTwitterCookies(page) {
+  try {
+    console.log('Loading pre-authenticated Twitter session...');
+    
+    // Get cookies from environment variable and parse them
+    const cookiesString = process.env.TWITTER_COOKIES;
+    if (!cookiesString) {
+      console.error('No Twitter cookies found in environment variables');
+      return false;
+    }
+    
+    const cookies = JSON.parse(cookiesString);
+    console.log(`Found ${cookies.length} Twitter cookies`);
+    
+    // Set these cookies in the browser
+    await page.setCookie(...cookies);
+    
+    console.log('Twitter cookies loaded successfully');
+    return true;
+  } catch (error) {
+    console.error('Error loading Twitter cookies:', error.message);
+    return false;
+  }
+}
+
 // Function to parse relative time (like "3m", "4h", etc) into a timestamp
 function parseRelativeTime(relativeTimeText, currentTime) {
   if (!relativeTimeText) return null;
@@ -274,16 +300,14 @@ async function scrapeMentions() {
     // Make sure browser is initialized
     browser = await initBrowser();
     const page = await browser.newPage();
-    
+
     // Set viewport and user agent
     await page.setViewport({ width: 1280, height: 800 });
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
 
-    // Log in to Twitter first
-    const loginSuccess = await loginToTwitter(page);
-    if (!loginSuccess) {
-      console.log('Failed to log in to Twitter. Continuing anyway...');
-    }
+    // Load pre-authenticated session
+    const cookiesLoaded = await loadTwitterCookies(page);
+    await takeScreenshot(page, 'after_loading_cookies');
     
     // Navigate to the search results
     const searchUrl = `https://x.com/search?q=%40${TARGET_ACCOUNT}&src=typed_query&f=live`;
