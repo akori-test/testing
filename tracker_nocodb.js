@@ -68,14 +68,19 @@ let browser = null;
 async function initBrowser() {
   if (!browser) {
     browser = await puppeteer.launch({
-      headless: 'new', // Run headless for automated server deployment
+      headless: 'new',
       userDataDir: USER_DATA_DIR,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-web-security',
-        '--disable-features=IsolateOrigins,site-per-process'
-      ]
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--window-size=1920,1080'
+      ],
+      defaultViewport: {
+        width: 1920,
+        height: 1080
+      }
     });
   }
   return browser;
@@ -177,52 +182,62 @@ async function loginToTwitter(page) {
   console.log('Logging in to X...');
   
   try {
-    // Navigate to login page - using x.com domain
+    // Navigate to login page
     await page.goto('https://x.com/i/flow/login', { waitUntil: 'networkidle2', timeout: 60000 });
     await takeScreenshot(page, 'login_page');
     
-    // Wait for the login form to be fully loaded
-    await page.waitForSelector('input[name="text"]', { visible: true, timeout: 10000 });
+    // Wait longer for the page to fully initialize and stabilize
+    await delay(3000);
     
-    // Type username/email
-    await page.type('input[name="text"]', process.env.TWITTER_USERNAME);
+    // Use a more robust selector method for the username input
+    const usernameSelector = 'input[autocomplete="username"]';
+    await page.waitForSelector(usernameSelector, { visible: true, timeout: 10000 });
+    
+    // Clear any existing text and type slowly to appear more human-like
+    await page.click(usernameSelector);
+    await page.type(usernameSelector, process.env.TWITTER_USERNAME, { delay: 100 });
+    await takeScreenshot(page, 'after_typing_username');
     await delay(1000);
     
-    // Click the Next button
-    await page.click('div[role="button"]:nth-of-type(6)');
-    await delay(2000);
-    await takeScreenshot(page, 'after_username');
-    
-    // Handle possible verification step (if account uses phone)
-    const verificationRequired = await page.evaluate(() => {
-      return document.body.innerText.includes('Enter your phone number or username');
+    // Find and click the Next button more reliably
+    await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('div[role="button"]'));
+      const nextButton = buttons.find(button => button.textContent.includes('Next'));
+      if (nextButton) nextButton.click();
     });
     
-    if (verificationRequired) {
-      // Type username again if phone verification appears
-      await page.type('input[name="text"]', process.env.TWITTER_USERNAME.replace('@', ''));
-      await delay(1000);
-      await page.click('div[role="button"]:nth-of-type(2)');
-      await delay(2000);
-    }
+    await delay(3000);
+    await takeScreenshot(page, 'after_username_next');
     
-    // Now enter password
-    await page.waitForSelector('input[name="password"]', { visible: true, timeout: 10000 });
-    await page.type('input[name="password"]', process.env.TWITTER_PASSWORD);
+    // Now wait for password field
+    const passwordSelector = 'input[name="password"]';
+    await page.waitForSelector(passwordSelector, { visible: true, timeout: 10000 });
+    
+    // Type password slowly
+    await page.type(passwordSelector, process.env.TWITTER_PASSWORD, { delay: 100 });
+    await takeScreenshot(page, 'after_typing_password');
     await delay(1000);
     
-    // Click log in button
-    await page.click('div[data-testid="LoginForm_Login_Button"]');
-    await delay(3000);
-    await takeScreenshot(page, 'after_login');
+    // Find and click the Login button
+    await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('div[role="button"]'));
+      const loginButton = buttons.find(button => 
+        button.textContent.includes('Log in') || 
+        button.textContent.includes('Sign in')
+      );
+      if (loginButton) loginButton.click();
+    });
     
-    // Check if login was successful
-    const loginSuccessful = await page.evaluate(() => {
+    await delay(5000);
+    await takeScreenshot(page, 'after_login_attempt');
+    
+    // Verify if login was successful by checking for elements only present after login
+    const isLoggedIn = await page.evaluate(() => {
       return !document.body.innerText.includes('Sign in to X') && 
              !document.body.innerText.includes('Sign in to Twitter');
     });
     
-    if (loginSuccessful) {
+    if (isLoggedIn) {
       console.log('Login successful');
       return true;
     } else {
@@ -235,7 +250,6 @@ async function loginToTwitter(page) {
     return false;
   }
 }
-
 
 
 async function scrapeMentions() {
