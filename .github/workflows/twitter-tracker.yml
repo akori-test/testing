@@ -31,13 +31,23 @@ jobs:
         run: npm install
       
       # Single run tracker script step with all environment variables
-      - name: Run tracker script
+      - name: Run tracker script for BankrCoin
         run: node tracker_nocodb.js
         env:
           NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
           TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
           TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
           TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
+
+
+      - name: Run tracker script for aixbt
+        run: node aixbt.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
+
           
       # Add this step to upload screenshots
       - name: Upload Screenshots
