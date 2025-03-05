@@ -171,50 +171,62 @@ async function updateNocoDB(totalMentions) {
   }
 }
 
-// Add this function after updateNocoDB but before scrapeMentions
 async function loginToTwitter(page) {
-  console.log('Logging in to Twitter...');
+  console.log('Logging in to X...');
   
   try {
-    // Navigate to login page
-    await page.goto('https://twitter.com/i/flow/login', { waitUntil: 'networkidle2' });
+    // Navigate to login page - using x.com domain
+    await page.goto('https://x.com/i/flow/login', { waitUntil: 'networkidle2', timeout: 60000 });
     await takeScreenshot(page, 'login_page');
     
-    // Wait for username field and type username
-    await page.waitForSelector('input[autocomplete="username"]');
-    await page.type('input[autocomplete="username"]', process.env.TWITTER_USERNAME);
+    // Wait for the login form to be fully loaded
+    await page.waitForSelector('input[name="text"]', { visible: true, timeout: 10000 });
+    
+    // Type username/email
+    await page.type('input[name="text"]', process.env.TWITTER_USERNAME);
+    await delay(1000);
     
     // Click the Next button
-    const nextButton = await page.$('div[role="button"]:has-text("Next")');
-    if (nextButton) {
-      await nextButton.click();
-    } else {
-      // Try alternate button selector if the first one doesn't work
-      await page.click('div[data-testid="auth_input_floating_action"]');
+    await page.click('div[role="button"]:nth-of-type(6)');
+    await delay(2000);
+    await takeScreenshot(page, 'after_username');
+    
+    // Handle possible verification step (if account uses phone)
+    const verificationRequired = await page.evaluate(() => {
+      return document.body.innerText.includes('Enter your phone number or username');
+    });
+    
+    if (verificationRequired) {
+      // Type username again if phone verification appears
+      await page.type('input[name="text"]', process.env.TWITTER_USERNAME.replace('@', ''));
+      await delay(1000);
+      await page.click('div[role="button"]:nth-of-type(2)');
+      await delay(2000);
     }
     
-    // Wait for password field
-    await page.waitForSelector('input[type="password"]', { timeout: 5000 });
-    await takeScreenshot(page, 'password_page');
+    // Now enter password
+    await page.waitForSelector('input[name="password"]', { visible: true, timeout: 10000 });
+    await page.type('input[name="password"]', process.env.TWITTER_PASSWORD);
+    await delay(1000);
     
-    // Type password
-    await page.type('input[type="password"]', process.env.TWITTER_PASSWORD);
-    
-    // Click login button
-    const loginButton = await page.$('div[data-testid="LoginForm_Login_Button"]');
-    if (loginButton) {
-      await loginButton.click();
-    } else {
-      // Try alternate button selector
-      await page.click('div[role="button"]:has-text("Log in")');
-    }
-    
-    // Wait for login to complete
-    await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    // Click log in button
+    await page.click('div[data-testid="LoginForm_Login_Button"]');
+    await delay(3000);
     await takeScreenshot(page, 'after_login');
     
-    console.log('Login successful');
-    return true;
+    // Check if login was successful
+    const loginSuccessful = await page.evaluate(() => {
+      return !document.body.innerText.includes('Sign in to X') && 
+             !document.body.innerText.includes('Sign in to Twitter');
+    });
+    
+    if (loginSuccessful) {
+      console.log('Login successful');
+      return true;
+    } else {
+      console.log('Login page still showing after attempt - login might have failed');
+      return false;
+    }
   } catch (error) {
     console.error('Error during login:', error.message);
     await takeScreenshot(page, 'login_error');
