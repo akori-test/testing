@@ -5,6 +5,8 @@
   "main": "tracker_nocodb.js",
   "dependencies": {
     "puppeteer": "^19.7.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "fs": "0.0.1-security",
     "path": "^0.12.7",
     "moment": "^2.29.4",
