@@ -1,7 +1,9 @@
 // X (Twitter) Mentions to NocoDB Integration - Simplified
 // Tracks @bankrbot mentions and updates NocoDB with just total mentions and timestamp
 
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
