@@ -2,7 +2,7 @@ name: Twitter Mention Tracker
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # Every 15 minutes
+    - cron: '0 12 * * *' # Runs at 12:00 UTC (noon) every day
   workflow_dispatch: # Add this for manual triggering
 
 jobs:
