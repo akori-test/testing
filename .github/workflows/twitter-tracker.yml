@@ -26,12 +26,8 @@ jobs:
         run: |
           mkdir -p results
           mkdir -p chrome_profile
-
-      - name: Create directories
-        run: |
-          mkdir -p results
-          mkdir -p chrome_profile
           mkdir -p chrome_profile_aixbt
+          mkdir -p chrome_profile_clanker
       
       - name: Install dependencies
         run: npm install
