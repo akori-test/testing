@@ -16,7 +16,7 @@ const REFRESH_INTERVAL_MINUTES = 15; // Check every 15 minutes
 const SCROLL_COUNT = 15; // Number of scrolls
 const SCROLL_DELAY_MS = 1200; // Delay between scrolls
 const OUTPUT_DIRECTORY = path.join(__dirname, 'results');
-const USER_DATA_DIR = path.join(__dirname, 'chrome_profile_aixbt'); // Different directory name
+const USER_DATA_DIR = path.join(__dirname, 'chrome_profile_clanker'); // Different directory name
 
 // NocoDB configuration
 const NOCODB_API_URL = 'https://app.nocodb.com/api/v2';
@@ -34,7 +34,7 @@ if (!fs.existsSync(USER_DATA_DIR)) {
 
 // Generate a unique filename for logging
 const sessionId = moment().format('YYYY-MM-DD_HH-mm-ss');
-const logFilePath = path.join(OUTPUT_DIRECTORY, `aixbt_tracker_log_${sessionId}.json`);
+const logFilePath = path.join(OUTPUT_DIRECTORY, `clanker_tracker_log_${sessionId}.json`);
 
 // Initialize logging structure
 const logData = {
