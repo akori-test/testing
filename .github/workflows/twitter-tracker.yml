@@ -60,6 +60,21 @@ jobs:
           TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
           TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
 
+      # Clean up browser processes before running next tracker
+      - name: Clean up between trackers
+        run: |
+          pkill -f chrome || true
+          sleep 5
+
+          
+      - name: Run tracker script for clanker
+        run: node clanker.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
+
           
       # Add this step to upload screenshots
       - name: Upload Screenshots
