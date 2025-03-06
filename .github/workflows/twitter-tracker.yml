@@ -28,6 +28,14 @@ jobs:
           mkdir -p chrome_profile
           mkdir -p chrome_profile_aixbt
           mkdir -p chrome_profile_clanker
+          mkdir -p chrome_profile_basedfartcoin
+          mkdir -p chrome_profile_firstbroccoli
+          mkdir -p chrome_profile_captainbnb
+          mkdir -p chrome_profile_siren
+          mkdir -p chrome_profile_testtoken
+          mkdir -p chrome_profile_bnbxbt
+          mkdir -p chrome_profile_cookie
+          
       
       - name: Install dependencies
         run: npm install
@@ -65,6 +73,97 @@ jobs:
           
       - name: Run tracker script for clanker
         run: node clanker.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
+
+      - name: Clean up between trackers
+        run: |
+          pkill -f chrome || true
+          sleep 5
+          
+      - name: Run tracker script for basedfartcoin
+        run: node basedfartcoin.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
+
+      - name: Clean up between trackers
+        run: |
+          pkill -f chrome || true
+          sleep 5
+
+      - name: Run tracker script for firstbroccoli
+        run: node firstbroccoli.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
+
+      - name: Clean up between trackers
+        run: |
+          pkill -f chrome || true
+          sleep 5
+
+      - name: Run tracker script for captainbnb
+        run: node captainbnb.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
+
+      - name: Clean up between trackers
+        run: |
+          pkill -f chrome || true
+          sleep 5
+          
+      - name: Run tracker script for siren
+        run: node siren.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
+
+      - name: Clean up between trackers
+        run: |
+          pkill -f chrome || true
+          sleep 5
+          
+      - name: Run tracker script for testtoken
+        run: node testtoken.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
+
+      - name: Clean up between trackers
+        run: |
+          pkill -f chrome || true
+          sleep 5
+
+      - name: Run tracker script for bnbxbt
+        run: node bnbxbt.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD: ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_COOKIES: ${{ secrets.TWITTER_COOKIES }}
+          
+      - name: Clean up between trackers
+        run: |
+          pkill -f chrome || true
+          sleep 5 
+
+      - name: Run tracker script for cookie
+        run: node cookie.js
         env:
           NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
           TWITTER_USERNAME: ${{ secrets.TWITTER_USERNAME }}
