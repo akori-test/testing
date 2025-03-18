@@ -21,25 +21,24 @@ jobs:
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt install ./google-chrome-stable_current_amd64.deb
       
-      # Configure system resources
-      - name: Configure system for Puppeteer
-        run: |
-          # Print Chrome version for debugging
-          google-chrome --version
-          # Increase shared memory
-          sudo mount -t tmpfs -o rw,nosuid,nodev,noexec,relatime,size=4G tmpfs /dev/shm
-      
       # Create logs directory
       - name: Create directories
         run: |
           mkdir -p logs
       
-      # Install dependencies
-      - name: Install dependencies
-        run: |
-          npm install
+      # Install dependencies with caching for faster builds
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       
-      # Run stablecoin yield scraper
+      - name: Install dependencies
+        run: npm install
+      
+      # Run stablecoin yield scraper with increased timeout
       - name: Run stablecoin yield scraper
         run: node stablecoin-yield-scraper.js
         env:
@@ -47,9 +46,9 @@ jobs:
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
           NODE_OPTIONS: "--max-old-space-size=4096"
-        timeout-minutes: 20
+        timeout-minutes: 15
       
-      # Upload logs and screenshots as artifacts (helpful for debugging)
+      # Upload logs and screenshots as artifacts
       - name: Upload Logs and Screenshots
         uses: actions/upload-artifact@v4
         if: always()
