@@ -1,9 +1,15 @@
 async function scrapeOriginYield() {
   console.log('Starting Origin Dollar (OUSD) yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -136,9 +142,15 @@ async function scrapeOriginYield() {
 }async function scrapeReserveYield() {
   console.log('Starting High Yield USD (hyUSD) yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -261,9 +273,15 @@ async function scrapeOriginYield() {
 }async function scrapeCompoundUSDS() {
   console.log('Starting Compound cUSDS yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -400,9 +418,15 @@ async function scrapeOriginYield() {
 }async function scrapeFraxYield() {
   console.log('Starting Staked Frax yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -557,9 +581,15 @@ async function scrapeOriginYield() {
 }async function scrapeAngleYield() {
   console.log('Starting stUSD yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -687,9 +717,15 @@ async function scrapeOriginYield() {
 }async function scrapeMStableYield() {
   console.log('Starting mStable USD yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -806,9 +842,15 @@ async function scrapeOriginYield() {
 }async function scrapeTreasuryYield() {
   console.log('Starting BUIDL (Treasury Bill) yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -906,9 +948,15 @@ async function scrapeOriginYield() {
 }async function scrapeAaveYield(tokenType) {
   console.log(`Starting Aave ${tokenType} yield scraping...`);
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -1114,9 +1162,15 @@ async function scrapeOriginYield() {
 }async function scrapeCompoundUSDCYield() {
   console.log('Starting cUSDC yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -1217,9 +1271,15 @@ async function scrapeOriginYield() {
 }async function scrapeCompoundYield() {
   console.log('Starting cUSDT yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -1320,9 +1380,15 @@ async function scrapeOriginYield() {
 }async function scrapeElixirYield() {
   console.log('Starting DEUSD yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -1403,9 +1469,15 @@ async function scrapeOriginYield() {
 }async function scrapeOndoYield() {
   console.log('Starting USDY yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -1489,9 +1561,15 @@ async function scrapeOriginYield() {
 }async function scrapeMountainYield() {
   console.log('Starting Mountain Protocol USD yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -1591,7 +1669,7 @@ const axios = require('axios');
 const NOCODB_BASE_URL = 'https://app.nocodb.com/api/v2';
 const STABLECOIN_YIELD_TABLE_ID = 'myr8mfzkfr5gxv5';
 const MEASUREMENTS_TABLE_ID = 'm66n7i5wc1m3np6'; // ID for the Measurements table
-const NOCODB_API_KEY = 'MK93fRsPqr1RTOqHtmsHCtpdkkFmQZggnEEQCDzR';
+const NOCODB_API_KEY = process.env.NOCODB_API_KEY || 'MK93fRsPqr1RTOqHtmsHCtpdkkFmQZggnEEQCDzR';
 const MEASUREMENTS_VIEW_ID = 'vwv68pkww9fa88kf'; // View ID from your previous version
 
 // Stablecoin details
@@ -1743,9 +1821,15 @@ async function getLatestMeasurementId() {
 async function scrapeEthenaYield() {
   console.log('Starting Ethena yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
@@ -1837,9 +1921,15 @@ async function scrapeEthenaYield() {
 async function scrapeSkyYield() {
   console.log('Starting USDS yield scraping...');
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  headless: 'new',
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',  // Add this for CI environments
+    '--disable-gpu',            // Add this for CI environments
+    '--single-process'          // Add this for CI environments
+  ],
+});
 
   try {
     const page = await browser.newPage();
