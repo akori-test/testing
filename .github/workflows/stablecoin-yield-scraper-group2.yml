@@ -1,0 +1,59 @@
+name: Stablecoin Yield Scraper - Group 2
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs at midnight UTC every day
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  scrape-yields-group2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      # Install Chrome for Puppeteer
+      - name: Install Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install ./google-chrome-stable_current_amd64.deb
+      
+      # Create logs directory
+      - name: Create directories
+        run: |
+          mkdir -p logs
+      
+      # Install dependencies with caching for faster builds
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      
+      - name: Install dependencies
+        run: npm install
+      
+      # Run stablecoin yield scraper with increased timeout
+      - name: Run stablecoin yield scraper - Group 2
+        run: node stablecoin-yield-scraper-group2.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        timeout-minutes: 15
+      
+      # Upload logs and screenshots as artifacts
+      - name: Upload Logs and Screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stablecoin-scraper-group2-logs
+          path: |
+            logs/*.log
+            logs/*.png
