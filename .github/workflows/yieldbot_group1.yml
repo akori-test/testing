@@ -1,4 +1,4 @@
-name: Stablecoin Yield Bot - Group 1
+name: Stablecoin YieldBot Group 1
 
 on:
   schedule:
@@ -9,26 +9,21 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/puppeteer/puppeteer:21.7.0
+      options: --shm-size=2gb
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          
       - name: Install dependencies
         run: |
-          npm install puppeteer axios
+          npm install axios
           
-      - name: Install Chromium dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgbm-dev libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6
-          
-      - name: Run YieldBot Group 1
+      - name: Run YieldBot Group1
         run: node yieldbot_group1.js
         env:
           NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          # Use a well-known Chrome executable path in the container
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
