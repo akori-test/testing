@@ -2,12 +2,13 @@ async function scrapeOriginYield() {
   console.log('Starting Origin Dollar (OUSD) yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -143,12 +144,13 @@ async function scrapeOriginYield() {
   console.log('Starting High Yield USD (hyUSD) yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -274,12 +276,13 @@ async function scrapeOriginYield() {
   console.log('Starting Compound cUSDS yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -419,12 +422,13 @@ async function scrapeOriginYield() {
   console.log('Starting Staked Frax yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -582,12 +586,13 @@ async function scrapeOriginYield() {
   console.log('Starting stUSD yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -718,12 +723,13 @@ async function scrapeOriginYield() {
   console.log('Starting mStable USD yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -843,12 +849,13 @@ async function scrapeOriginYield() {
   console.log('Starting BUIDL (Treasury Bill) yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -949,12 +956,13 @@ async function scrapeOriginYield() {
   console.log(`Starting Aave ${tokenType} yield scraping...`);
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -1163,12 +1171,13 @@ async function scrapeOriginYield() {
   console.log('Starting cUSDC yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -1272,12 +1281,13 @@ async function scrapeOriginYield() {
   console.log('Starting cUSDT yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -1381,12 +1391,13 @@ async function scrapeOriginYield() {
   console.log('Starting DEUSD yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -1470,12 +1481,13 @@ async function scrapeOriginYield() {
   console.log('Starting USDY yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -1562,12 +1574,13 @@ async function scrapeOriginYield() {
   console.log('Starting Mountain Protocol USD yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -1822,12 +1835,13 @@ async function scrapeEthenaYield() {
   console.log('Starting Ethena yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
@@ -1922,12 +1936,13 @@ async function scrapeSkyYield() {
   console.log('Starting USDS yield scraping...');
   const browser = await puppeteer.launch({
   headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',  // Add this for CI environments
-    '--disable-gpu',            // Add this for CI environments
-    '--single-process'          // Add this for CI environments
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--single-process'
   ],
 });
 
