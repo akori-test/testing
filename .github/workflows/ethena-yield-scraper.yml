@@ -1,0 +1,51 @@
+name: Ethena Yield Scraper
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs at midnight UTC every day
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  scrape-ethena-yield:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      # Install Chrome for Puppeteer
+      - name: Install Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install ./google-chrome-stable_current_amd64.deb
+      
+      # Create logs directory
+      - name: Create directories
+        run: |
+          mkdir -p logs
+      
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          npm install puppeteer axios
+      
+      # Run Ethena yield scraper
+      - name: Run Ethena yield scraper
+        run: node ethena-scraper.js
+        env:
+          NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+        timeout-minutes: 5
+      
+      # Upload logs and screenshots as artifacts (helpful for debugging)
+      - name: Upload Logs and Screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ethena-scraper-logs
+          path: |
+            logs/*.log
+            logs/*.png
