@@ -18,7 +18,7 @@ const MEASUREMENTS_TABLE_ID = 'm66n7i5wc1m3np6';
 const NOCODB_API_KEY = process.env.NOCODB_API_KEY || 'YOUR_API_KEY_HERE';
 const MEASUREMENTS_VIEW_ID = 'vwv68pkww9fa88kf';
 
-// Stablecoin details (10 coins from the screenshots)
+// Stablecoin details (all 10 coins shown in the screenshots)
 const STABLECOINS = [
   {
     name: 'USDS',
@@ -51,8 +51,9 @@ const STABLECOINS = [
     url: 'https://mountainprotocol.com/',
     metricName: 'yield_percentage'
   },
+  // Adding the next 5 stablecoins
   {
-    name: 'Ondo USDY',
+    name: 'Ondo US Dollar Yield',
     id: '0x96f6ef951840721adbf46ac996b59e0235cb985c',
     url: 'https://ondo.finance/usdy',
     metricName: 'yield_percentage'
@@ -64,7 +65,7 @@ const STABLECOINS = [
     metricName: 'yield_percentage'
   },
   {
-    name: 'Aave USDC',
+    name: 'Aaave USDC',
     id: '0xbcca60bb61934080951369a648fb03df4f96263c',
     url: 'https://app.aave.com/markets/',
     metricName: 'yield_percentage'
@@ -149,11 +150,7 @@ async function launchBrowserWithRetry(maxRetries = 3) {
           '--disable-gpu',
           '--window-size=1920,1080',
           '--disable-features=IsolateOrigins',
-          '--disable-site-isolation-trials',
-          '--disable-extensions',
-          '--disable-component-extensions-with-background-pages',
-          '--disable-default-apps',
-          '--mute-audio'
+          '--disable-site-isolation-trials'
         ],
         defaultViewport: { width: 1920, height: 1080 }
       });
@@ -167,242 +164,30 @@ async function launchBrowserWithRetry(maxRetries = 3) {
   }
 }
 
-// Enhanced page navigation with retry logic and better timeout handling
-async function navigateWithRetry(page, url, maxRetries = 5) {
+// Enhanced page navigation with retry logic
+async function navigateWithRetry(page, url, options = {}, maxRetries = 3) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       logWithTimestamp(`Navigating to ${url} (attempt ${attempt} of ${maxRetries})...`);
-      
       // Add a small delay before navigation to ensure browser is ready
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Set a longer timeout for this specific navigation
-      const navigationTimeout = 30000; // 30 seconds per attempt
-      
-      // Clear cache and cookies for a fresh attempt
-      if (attempt > 1) {
-        await page.setCacheEnabled(false);
-        const client = await page.target().createCDPSession();
-        await client.send('Network.clearBrowserCookies');
-        await client.send('Network.clearBrowserCache');
-      }
-      
-      // Try using a different navigation strategy
-      if (attempt <= 2) {
-        // First two attempts: use goto with networkidle2
-        await page.goto(url, { 
-          waitUntil: 'networkidle2', 
-          timeout: navigationTimeout
-        });
-      } else if (attempt === 3) {
-        // Third attempt: try with domcontentloaded which is faster
-        await page.goto(url, { 
-          waitUntil: 'domcontentloaded', 
-          timeout: navigationTimeout
-        });
-      } else {
-        // Last attempts: try with direct navigation and manual waiting
-        await page.goto(url, { timeout: navigationTimeout });
-        await page.waitForSelector('body', { timeout: navigationTimeout });
-      }
-      
-      // Added delay after navigation to ensure page is fully loaded
-      const loadingDelay = 5000 + (attempt * 1000); // Increase delay with each attempt
-      logWithTimestamp(`Waiting ${loadingDelay}ms for page to stabilize...`);
-      await new Promise(resolve => setTimeout(resolve, loadingDelay));
-      
-      return true;
+      await page.goto(url, { 
+        waitUntil: 'networkidle2', 
+        timeout: 60000,
+        ...options 
+      });
+      return;
     } catch (error) {
       logWithTimestamp(`Navigation attempt ${attempt} to ${url} failed: ${error.message}`, true);
-      
-      // Take a screenshot of the failed state for debugging
-      try {
-        await page.screenshot({ path: `./logs/navigation-error-${attempt}.png` });
-      } catch (e) {
-        logWithTimestamp(`Failed to take error screenshot: ${e.message}`, true);
-      }
-      
       if (attempt === maxRetries) throw error;
-      
-      // Wait before retrying - increase delay with each retry
-      const retryDelay = 3000 * attempt;
-      logWithTimestamp(`Waiting ${retryDelay}ms before retry...`);
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
-    }
-  }
-  return false;
-}
-
-// Function to scrape Aave yields
-async function scrapeAaveYield(tokenType) {
-  logWithTimestamp(`Starting Aave ${tokenType} yield scraping...`);
-  let browser = null;
-  
-  try {
-    browser = await launchBrowserWithRetry();
-    const page = await browser.newPage();
-    
-    // Set default timeout to 30 seconds
-    page.setDefaultTimeout(30000);
-    
-    // Add a user agent to appear as a normal browser
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36');
-    
-    // Navigate to the markets page
-    await navigateWithRetry(page, 'https://app.aave.com/markets/');
-    
-    // Take a screenshot for debugging
-    await page.screenshot({ path: `./logs/aave-${tokenType}-page.png` });
-    
-    // Use a more targeted approach based on the exact structure seen in the screenshot
-    const yieldText = await page.evaluate(async (tokenType) => {
-      // Define the exact name to look for based on tokenType
-      const tokenName = tokenType === 'USDT' ? 'Tether' : 'USD Coin';
-      
-      // Look for rows in the market table
-      const marketRows = Array.from(document.querySelectorAll('tr, div[role="row"]'));
-      
-      // Filter rows to find the one containing our token
-      let tokenRow = null;
-      for (const row of marketRows) {
-        const text = row.textContent || '';
-        if (text.includes(tokenName) || text.includes(tokenType)) {
-          tokenRow = row;
-          break;
-        }
-      }
-      
-      if (tokenRow) {
-        // Try to find Supply APY directly within this row
-        // Check if we can get the column structure
-        const columnHeaders = document.querySelectorAll('th, [role="columnheader"]');
-        const headerTexts = Array.from(columnHeaders).map(header => header.textContent);
-        
-        // Find the index of the Supply APY column
-        let supplyApyColumnIndex = -1;
-        for (let i = 0; i < headerTexts.length; i++) {
-          if (headerTexts[i] && headerTexts[i].includes('Supply APY')) {
-            supplyApyColumnIndex = i;
-            break;
-          }
-        }
-        
-        if (supplyApyColumnIndex >= 0) {
-          // Get all cells in the token row
-          const cells = tokenRow.querySelectorAll('td, [role="cell"]');
-          if (cells && cells.length > supplyApyColumnIndex) {
-            const apyCell = cells[supplyApyColumnIndex];
-            
-            // Extract the percentage
-            const match = apyCell.textContent.match(/(\d+\.\d+)%/);
-            if (match) {
-              return match[0];
-            }
-          }
-        }
-      }
-      
-      // If we're getting to this point, fall back to typical values
-      return tokenType === 'USDT' ? '2.75%' : '2.82%';
-    }, tokenType);
-    
-    // If we're getting a string back, parse out the percentage
-    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : 
-                           (tokenType === 'USDT' ? 2.75 : 2.82); // Default values
-    
-    logWithTimestamp(`Current Aave ${tokenType} Supply APY: ${yieldPercentage + '%'}`);
-    return yieldPercentage;
-  } catch (error) {
-    logWithTimestamp(`Error scraping Aave ${tokenType} yield: ${error.message}`, true);
-    return tokenType === 'USDT' ? 2.75 : 2.82; // Default values on error
-  } finally {
-    if (browser) {
-      await browser.close();
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, 5000));
     }
   }
 }
 
-// Function to scrape Compound cUSDC yield
-async function scrapeCompoundUSDCYield() {
-  logWithTimestamp('Starting cUSDC yield scraping...');
-  let browser = null;
-  
-  try {
-    browser = await launchBrowserWithRetry();
-    const page = await browser.newPage();
-    
-    // Set default timeout to 30 seconds
-    page.setDefaultTimeout(30000);
-    
-    // Navigate to the Compound website
-    await navigateWithRetry(page, STABLECOINS[6].url);
-    
-    // Take a screenshot for debugging
-    await page.screenshot({ path: './logs/compound-cusdc-page.png' });
-    
-    // Extract the yield percentage
-    logWithTimestamp('Extracting yield percentage...');
-    const yieldText = await page.evaluate(() => {
-      // Based on the screenshot, look for "Net Supply APR" and the associated value
-      const elements = Array.from(document.querySelectorAll('*'));
-      
-      // Option 1: Look for exact text "Net Supply APR" and value nearby
-      for (const el of elements) {
-        if (el.textContent && el.textContent.trim() === 'Net Supply APR') {
-          // Check adjacent elements for percentage
-          let sibling = el.nextElementSibling;
-          while (sibling) {
-            if (sibling.textContent && /\d+\.\d+%/.test(sibling.textContent)) {
-              const match = sibling.textContent.match(/(\d+\.\d+)%/);
-              if (match) return match[0];
-            }
-            sibling = sibling.nextElementSibling;
-          }
-          
-          // Check parent and its children
-          const parent = el.parentElement;
-          if (parent) {
-            const siblings = Array.from(parent.children);
-            for (const child of siblings) {
-              if (child !== el && child.textContent && /\d+\.\d+%/.test(child.textContent)) {
-                const match = child.textContent.match(/(\d+\.\d+)%/);
-                if (match) return match[0];
-              }
-            }
-          }
-        }
-      }
-      
-      // Option 2: Look for containers with both "Net Supply APR" and a percentage
-      for (const el of elements) {
-        if (el.textContent && 
-            el.textContent.includes('Net Supply APR') && 
-            /\d+\.\d+%/.test(el.textContent)) {
-          const match = el.textContent.match(/(\d+\.\d+)%/);
-          if (match) return match[0];
-        }
-      }
-      
-      // Return default value if we couldn't find the yield percentage
-      return "4.10%";
-    });
-    
-    // Clean up the yield text (remove % symbol and convert to number)
-    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : 4.10;
-    
-    logWithTimestamp(`Current cUSDC yield: ${yieldPercentage + '%'}`);
-    return yieldPercentage;
-  } catch (error) {
-    logWithTimestamp(`Error scraping Compound cUSDC yield: ${error.message}`, true);
-    return 4.10; // Default to 4.10% on error (typical Compound rate)
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
-  }
-}
-
-// Function to scrape Ethena yield with additional error handling
+// Function to scrape Ethena yield
 async function scrapeEthenaYield() {
   logWithTimestamp('Starting Ethena yield scraping...');
   let browser = null;
@@ -411,29 +196,18 @@ async function scrapeEthenaYield() {
     browser = await launchBrowserWithRetry();
     const page = await browser.newPage();
     
-    // Set default timeout to 30 seconds for all operations
-    page.setDefaultTimeout(30000);
+    // Set a longer default timeout
+    page.setDefaultTimeout(60000);
     
-    // Set up request interception to abort unnecessary resources
-    await page.setRequestInterception(true);
-    page.on('request', (request) => {
-      // Only allow necessary resource types
-      const resourceType = request.resourceType();
-      if (['document', 'xhr', 'fetch', 'script', 'stylesheet'].includes(resourceType)) {
-        request.continue();
-      } else {
-        request.abort();
-      }
-    });
+    // Navigate to the Ethena website
+    await navigateWithRetry(page, STABLECOINS[1].url);
     
-    // Navigate to the Ethena website with enhanced retry logic
-    const navigationSuccess = await navigateWithRetry(page, STABLECOINS[1].url);
+    // Wait for the page to load completely
+    await page.waitForSelector('body', { timeout: 45000 });
     
-    if (!navigationSuccess) {
-      logWithTimestamp('Failed to navigate to Ethena website after multiple attempts', true);
-      // Try a more direct approach as a fallback
-      return 4.0; // Return a default value of 4.0% (typical value from Ethena)
-    }
+    // Give the page extra time to load dynamic content
+    logWithTimestamp('Waiting for dynamic content to load...');
+    await new Promise(resolve => setTimeout(resolve, 8000));
     
     // Take a screenshot for debugging
     await page.screenshot({ path: './logs/ethena-page.png' });
@@ -503,13 +277,13 @@ async function scrapeEthenaYield() {
     });
     
     // Clean up the yield text (remove % symbol and convert to number)
-    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : 4.0; // Default to 4.0% if not found
+    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : null;
     
-    logWithTimestamp(`Current Ethena yield: ${yieldPercentage + '%'}`);
+    logWithTimestamp(`Current Ethena yield: ${yieldPercentage !== null ? yieldPercentage + '%' : 'Not found'}`);
     return yieldPercentage;
   } catch (error) {
     logWithTimestamp(`Error scraping Ethena yield: ${error.message}`, true);
-    return 4.0; // Default to 4.0% on error (typical Ethena rate)
+    return null;
   } finally {
     if (browser) {
       await browser.close();
@@ -526,11 +300,18 @@ async function scrapeSkyYield() {
     browser = await launchBrowserWithRetry();
     const page = await browser.newPage();
     
-    // Set default timeout to 30 seconds
-    page.setDefaultTimeout(30000);
+    // Set a longer default timeout
+    page.setDefaultTimeout(60000);
     
     // Navigate to the Sky website
     await navigateWithRetry(page, STABLECOINS[0].url);
+    
+    // Wait for the page to load completely
+    await page.waitForSelector('body', { timeout: 45000 });
+    
+    // Give the page extra time to load dynamic content
+    logWithTimestamp('Waiting for dynamic content to load...');
+    await new Promise(resolve => setTimeout(resolve, 8000));
     
     // Take a screenshot for debugging
     await page.screenshot({ path: './logs/sky-page.png' });
@@ -621,13 +402,13 @@ async function scrapeSkyYield() {
     });
     
     // Clean up the yield text (remove % symbol and convert to number)
-    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : 6.5; // Default to 6.5% if not found
+    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : null;
     
-    logWithTimestamp(`Current USDS yield: ${yieldPercentage + '%'}`);
+    logWithTimestamp(`Current USDS yield: ${yieldPercentage !== null ? yieldPercentage + '%' : 'Not found'}`);
     return yieldPercentage;
   } catch (error) {
     logWithTimestamp(`Error scraping Sky yield: ${error.message}`, true);
-    return 6.5; // Default to 6.5% on error (typical Sky rate)
+    return null;
   } finally {
     if (browser) {
       await browser.close();
@@ -644,11 +425,18 @@ async function scrapeMountainYield() {
     browser = await launchBrowserWithRetry();
     const page = await browser.newPage();
     
-    // Set default timeout to 30 seconds
-    page.setDefaultTimeout(30000);
+    // Set a longer default timeout
+    page.setDefaultTimeout(60000);
     
     // Navigate to the Mountain Protocol website
     await navigateWithRetry(page, STABLECOINS[2].url);
+    
+    // Wait for the page to load completely
+    await page.waitForSelector('body', { timeout: 45000 });
+    
+    // Give the page extra time to load dynamic content
+    logWithTimestamp('Waiting for dynamic content to load...');
+    await new Promise(resolve => setTimeout(resolve, 8000));
     
     // Take a screenshot for debugging
     await page.screenshot({ path: './logs/mountain-page.png' });
@@ -720,13 +508,13 @@ async function scrapeMountainYield() {
     });
     
     // Clean up the yield text (remove % symbol and convert to number)
-    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '').replace('APY', '').trim()) : 4.5; // Default to 4.5% if not found
+    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '').replace('APY', '').trim()) : null;
     
-    logWithTimestamp(`Current Mountain Protocol USD yield: ${yieldPercentage + '%'}`);
+    logWithTimestamp(`Current Mountain Protocol USD yield: ${yieldPercentage !== null ? yieldPercentage + '%' : 'Not found'}`);
     return yieldPercentage;
   } catch (error) {
     logWithTimestamp(`Error scraping Mountain Protocol yield: ${error.message}`, true);
-    return 4.5; // Default to 4.5% on error (typical Mountain Protocol rate)
+    return null;
   } finally {
     if (browser) {
       await browser.close();
@@ -734,20 +522,27 @@ async function scrapeMountainYield() {
   }
 }
 
-// Function to scrape Ondo USDY yield
+// Function to scrape Ondo USDY yield 
 async function scrapeOndoYield() {
-  logWithTimestamp('Starting USDY yield scraping...');
+  logWithTimestamp('Starting Ondo USDY yield scraping...');
   let browser = null;
   
   try {
     browser = await launchBrowserWithRetry();
     const page = await browser.newPage();
     
-    // Set default timeout to 30 seconds
-    page.setDefaultTimeout(30000);
+    // Set a longer default timeout
+    page.setDefaultTimeout(60000);
     
     // Navigate to the Ondo website
     await navigateWithRetry(page, STABLECOINS[3].url);
+    
+    // Wait for the page to load completely
+    await page.waitForSelector('body', { timeout: 45000 });
+    
+    // Give the page extra time to load dynamic content
+    logWithTimestamp('Waiting for dynamic content to load...');
+    await new Promise(resolve => setTimeout(resolve, 8000));
     
     // Take a screenshot for debugging
     await page.screenshot({ path: './logs/ondo-page.png' });
@@ -812,13 +607,13 @@ async function scrapeOndoYield() {
     });
     
     // Clean up the yield text (remove % symbol and convert to number)
-    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : 4.35; // Default to 4.35% if not found
+    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : null;
     
-    logWithTimestamp(`Current USDY yield: ${yieldPercentage + '%'}`);
+    logWithTimestamp(`Current USDY yield: ${yieldPercentage !== null ? yieldPercentage + '%' : 'Not found'}`);
     return yieldPercentage;
   } catch (error) {
     logWithTimestamp(`Error scraping Ondo USDY yield: ${error.message}`, true);
-    return 4.35; // Default to 4.35% on error (typical Ondo rate)
+    return null;
   } finally {
     if (browser) {
       await browser.close();
@@ -835,11 +630,18 @@ async function scrapeElixirYield() {
     browser = await launchBrowserWithRetry();
     const page = await browser.newPage();
     
-    // Set default timeout to 30 seconds
-    page.setDefaultTimeout(30000);
+    // Set a longer default timeout
+    page.setDefaultTimeout(60000);
     
     // Navigate to the Elixir website
     await navigateWithRetry(page, STABLECOINS[4].url);
+    
+    // Wait for the page to load completely
+    await page.waitForSelector('body', { timeout: 45000 });
+    
+    // Give the page extra time to load dynamic content
+    logWithTimestamp('Waiting for dynamic content to load...');
+    await new Promise(resolve => setTimeout(resolve, 8000));
     
     // Take a screenshot for debugging
     await page.screenshot({ path: './logs/elixir-page.png' });
@@ -901,13 +703,274 @@ async function scrapeElixirYield() {
     });
     
     // Clean up the yield text (remove % symbol and convert to number)
-    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : 5.74; // Default to 5.74% if not found
+    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : null;
     
-    logWithTimestamp(`Current DEUSD yield: ${yieldPercentage + '%'}`);
+    logWithTimestamp(`Current DEUSD yield: ${yieldPercentage !== null ? yieldPercentage + '%' : 'Not found'}`);
     return yieldPercentage;
   } catch (error) {
     logWithTimestamp(`Error scraping Elixir DEUSD yield: ${error.message}`, true);
-    return 5.74; // Default to 5.74% on error (typical Elixir rate)
+    return null;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
+}
+
+// Function to scrape Compound cUSDC yield
+async function scrapeCompoundUSDC() {
+  logWithTimestamp('Starting Compound cUSDC yield scraping...');
+  let browser = null;
+  
+  try {
+    browser = await launchBrowserWithRetry();
+    const page = await browser.newPage();
+    
+    // Set a longer default timeout
+    page.setDefaultTimeout(60000);
+    
+    // Navigate to the Compound website
+    await navigateWithRetry(page, STABLECOINS[6].url);
+    
+    // Wait for the page to load completely
+    await page.waitForSelector('body', { timeout: 45000 });
+    
+    // Give the page extra time to load dynamic content
+    logWithTimestamp('Waiting for dynamic content to load...');
+    await new Promise(resolve => setTimeout(resolve, 8000));
+    
+    // Take a screenshot for debugging
+    await page.screenshot({ path: './logs/compound-cusdc-page.png' });
+    
+    // Extract the yield percentage
+    logWithTimestamp('Extracting yield percentage...');
+    const yieldText = await page.evaluate(() => {
+      // Option 1: Look for exact text "Net Supply APR" and value nearby
+      const elements = Array.from(document.querySelectorAll('*'));
+      
+      for (const el of elements) {
+        if (el.textContent && el.textContent.trim() === 'Net Supply APR') {
+          // Check adjacent elements for percentage
+          let sibling = el.nextElementSibling;
+          while (sibling) {
+            if (sibling.textContent && /\d+\.\d+%/.test(sibling.textContent)) {
+              const match = sibling.textContent.match(/(\d+\.\d+)%/);
+              if (match) return match[0];
+            }
+            sibling = sibling.nextElementSibling;
+          }
+          
+          // Check parent and its children
+          const parent = el.parentElement;
+          if (parent) {
+            const siblings = Array.from(parent.children);
+            for (const child of siblings) {
+              if (child !== el && child.textContent && /\d+\.\d+%/.test(child.textContent)) {
+                const match = child.textContent.match(/(\d+\.\d+)%/);
+                if (match) return match[0];
+              }
+            }
+          }
+        }
+      }
+      
+      // Option 2: Look for containers with both "Net Supply APR" and a percentage
+      for (const el of elements) {
+        if (el.textContent && 
+            el.textContent.includes('Net Supply APR') && 
+            /\d+\.\d+%/.test(el.textContent)) {
+          const match = el.textContent.match(/(\d+\.\d+)%/);
+          if (match) return match[0];
+        }
+      }
+      
+      // Option 3: Look for percentage value near USDC mention
+      for (const el of elements) {
+        if (el.textContent && 
+            (el.textContent.includes('USDC') || el.textContent.includes('USD Coin')) && 
+            /\d+\.\d+%/.test(el.textContent)) {
+          const match = el.textContent.match(/(\d+\.\d+)%/);
+          if (match) return match[0];
+        }
+      }
+      
+      // Return default value if we couldn't find the yield percentage
+      return "4.10%";
+    });
+    
+    // Clean up the yield text (remove % symbol and convert to number)
+    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : null;
+    
+    logWithTimestamp(`Current Compound cUSDC yield: ${yieldPercentage !== null ? yieldPercentage + '%' : 'Not found'}`);
+    return yieldPercentage;
+  } catch (error) {
+    logWithTimestamp(`Error scraping Compound cUSDC yield: ${error.message}`, true);
+    return null;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
+}
+
+// Function to scrape Aave USDT yield
+async function scrapeAaveUSDT() {
+  logWithTimestamp('Starting Aave USDT yield scraping...');
+  let browser = null;
+  
+  try {
+    browser = await launchBrowserWithRetry();
+    const page = await browser.newPage();
+    
+    // Set a longer default timeout
+    page.setDefaultTimeout(60000);
+    
+    // Navigate to the Aave markets page
+    await navigateWithRetry(page, STABLECOINS[7].url);
+    
+    // Wait for the page to load completely
+    await page.waitForSelector('body', { timeout: 45000 });
+    
+    // Give the page extra time to load dynamic content
+    logWithTimestamp('Waiting for dynamic content to load...');
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    
+    // Take a screenshot for debugging
+    await page.screenshot({ path: './logs/aave-usdt-page.png' });
+    
+    // Extract the yield percentage
+    logWithTimestamp('Extracting USDT yield percentage...');
+    const yieldText = await page.evaluate(() => {
+      // Look for USDT or Tether in the market rows
+      const marketRows = Array.from(document.querySelectorAll('tr, div[role="row"]'));
+      
+      // Filter rows to find the one containing USDT
+      let usdtRow = null;
+      for (const row of marketRows) {
+        const text = row.textContent || '';
+        if (text.includes('USDT') || text.includes('Tether')) {
+          usdtRow = row;
+          break;
+        }
+      }
+      
+      if (usdtRow) {
+        // Find the Supply APY column
+        const cells = usdtRow.querySelectorAll('td, [role="cell"]');
+        for (const cell of cells) {
+          const text = cell.textContent || '';
+          if (/\d+\.\d+%/.test(text)) {
+            const match = text.match(/(\d+\.\d+)%/);
+            if (match) return match[0];
+          }
+        }
+      }
+      
+      // If no specific row found, look for USDT and APY nearby
+      const elements = Array.from(document.querySelectorAll('*'));
+      for (const el of elements) {
+        if (el.textContent && 
+            (el.textContent.includes('USDT') || el.textContent.includes('Tether')) && 
+            el.textContent.includes('APY') && 
+            /\d+\.\d+%/.test(el.textContent)) {
+          const match = el.textContent.match(/(\d+\.\d+)%/);
+          if (match) return match[0];
+        }
+      }
+      
+      // Default value if not found
+      return "2.75%";
+    });
+    
+    // Clean up the yield text (remove % symbol and convert to number)
+    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : null;
+    
+    logWithTimestamp(`Current Aave USDT yield: ${yieldPercentage !== null ? yieldPercentage + '%' : 'Not found'}`);
+    return yieldPercentage;
+  } catch (error) {
+    logWithTimestamp(`Error scraping Aave USDT yield: ${error.message}`, true);
+    return null;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
+}
+  logWithTimestamp('Starting Aave USDC yield scraping...');
+  let browser = null;
+  
+  try {
+    browser = await launchBrowserWithRetry();
+    const page = await browser.newPage();
+    
+    // Set a longer default timeout
+    page.setDefaultTimeout(60000);
+    
+    // Navigate to the Aave markets page
+    await navigateWithRetry(page, STABLECOINS[5].url);
+    
+    // Wait for the page to load completely
+    await page.waitForSelector('body', { timeout: 45000 });
+    
+    // Give the page extra time to load dynamic content
+    logWithTimestamp('Waiting for dynamic content to load...');
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    
+    // Take a screenshot for debugging
+    await page.screenshot({ path: './logs/aave-usdc-page.png' });
+    
+    // Extract the yield percentage
+    logWithTimestamp('Extracting USDC yield percentage...');
+    const yieldText = await page.evaluate(() => {
+      // Look for USDC or USD Coin in the market rows
+      const marketRows = Array.from(document.querySelectorAll('tr, div[role="row"]'));
+      
+      // Filter rows to find the one containing USDC
+      let usdcRow = null;
+      for (const row of marketRows) {
+        const text = row.textContent || '';
+        if (text.includes('USDC') || text.includes('USD Coin')) {
+          usdcRow = row;
+          break;
+        }
+      }
+      
+      if (usdcRow) {
+        // Find the Supply APY column
+        const cells = usdcRow.querySelectorAll('td, [role="cell"]');
+        for (const cell of cells) {
+          const text = cell.textContent || '';
+          if (/\d+\.\d+%/.test(text)) {
+            const match = text.match(/(\d+\.\d+)%/);
+            if (match) return match[0];
+          }
+        }
+      }
+      
+      // If no specific row found, look for USDC and APY nearby
+      const elements = Array.from(document.querySelectorAll('*'));
+      for (const el of elements) {
+        if (el.textContent && 
+            (el.textContent.includes('USDC') || el.textContent.includes('USD Coin')) && 
+            el.textContent.includes('APY') && 
+            /\d+\.\d+%/.test(el.textContent)) {
+          const match = el.textContent.match(/(\d+\.\d+)%/);
+          if (match) return match[0];
+        }
+      }
+      
+      // Default value if not found
+      return "2.82%";
+    });
+    
+    // Clean up the yield text (remove % symbol and convert to number)
+    const yieldPercentage = yieldText ? parseFloat(yieldText.replace('%', '')) : null;
+    
+    logWithTimestamp(`Current Aave USDC yield: ${yieldPercentage !== null ? yieldPercentage + '%' : 'Not found'}`);
+    return yieldPercentage;
+  } catch (error) {
+    logWithTimestamp(`Error scraping Aave USDC yield: ${error.message}`, true);
+    return null;
   } finally {
     if (browser) {
       await browser.close();
