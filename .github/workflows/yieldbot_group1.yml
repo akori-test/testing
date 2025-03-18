@@ -1,29 +1,46 @@
-name: Stablecoin YieldBot Group 1
+name: Stablecoin Yield Scraper
 
 on:
   schedule:
-    # Run once per day at 00:00 UTC
-    - cron: '0 0 * * *'
-  workflow_dispatch:  # Allows manual triggering
+    - cron: '0 0 * * *' # Runs at midnight UTC every day
+  workflow_dispatch: # Add this for manual triggering
 
 jobs:
-  scrape:
+  scrape-yields:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/puppeteer/puppeteer:21.7.0
-      options: --shm-size=2gb
-    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Install dependencies
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      # Install Chrome for Puppeteer using the same method as the working example
+      - name: Install Chrome
         run: |
-          npm install axios
-          
-      - name: Run YieldBot Group1
-        run: node yieldbot_group1.js
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install ./google-chrome-stable_current_amd64.deb
+      
+      # Create logs directory
+      - name: Create directories
+        run: |
+          mkdir -p logs
+      
+      - name: Install dependencies
+        run: npm install
+      
+      # Run yield scraper script
+      - name: Run stablecoin yield scraper
+        run: node scraper.js
         env:
           NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
-          # Use a well-known Chrome executable path in the container
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+      
+      # Upload logs as artifacts (optional but helpful for debugging)
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: yield-scraper-logs
+          path: logs/*.log
