@@ -20,12 +20,12 @@ const TICKER_TO_COINGECKO_ID = {
   'PAXG': 'pax-gold',
   'PYUSD': 'paypal-usd',
   'TUSD': 'true-usd',
-  'USD0': 'usual-stablecoin', // May need adjustment
+  'USD0': 'usual',      
   'XSGD': 'xsgd',
   'LUSD': 'liquity-usd',
   'EURC': 'euro-coin',
   'GUSD': 'gemini-dollar',
-  'RLUSD': 'rpusd' // May need adjustment
+  'RLUSD': 'ripple-usd'  
 };
 
 // Utility function to sleep for specified milliseconds
