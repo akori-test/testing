@@ -1,4 +1,4 @@
-name: Daily Trending and Top Gainers Update
+name: Daily Trending / Gainers
 
 on:
   schedule:
