@@ -5,7 +5,10 @@
   "scripts": {
     "twitter": "node tracker_nocodb.js",
     "ethena": "node ethena-scraper.js",
-    "stablecoins": "node stablecoin-yield-scraper.js"
+    "stablecoins": "node stablecoin-yield-scraper.js",
+    "update-gainers": "node top-gainers.js",
+    "update-trending": "node trending.js",
+    "update-all": "node top-gainers.js && node trending.js"
   },
   "dependencies": {
     "puppeteer": "^21.7.0",
