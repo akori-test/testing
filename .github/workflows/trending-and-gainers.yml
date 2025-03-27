@@ -1,0 +1,35 @@
+name: Daily Trending and Top Gainers Update
+
+on:
+  schedule:
+    # Run at 12:00 UTC every day
+    - cron: '0 12 * * *'
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  update-stablecoin-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Update top gainers
+      run: node top-gainers.js
+      env:
+        COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+        NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
+    
+    - name: Update trending
+      run: node trending.js
+      env:
+        COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+        NOCODB_API_KEY: ${{ secrets.NOCODB_API_KEY }}
